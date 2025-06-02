@@ -12,7 +12,7 @@ from networkx.algorithms.community import girvan_newman, modularity
 
 with open('temp.pkl', 'rb') as g:
     network = pickle.load(g)
-G = network['G']
+G = network
 
 
 '''---------------Louvain---------------'''
