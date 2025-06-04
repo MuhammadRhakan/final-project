@@ -10,7 +10,7 @@ from collections import Counter
 from community import community_louvain
 from networkx.algorithms.community import girvan_newman, modularity
 
-with open('temp.pkl', 'rb') as g:
+with open('network_resource.pkl', 'rb') as g:
     network = pickle.load(g)
 G = network
 
@@ -21,22 +21,17 @@ def leiden_community_detection(G, partition_type, **kwargs):
   edges = [(u, v, {'weight': d['weight']}) for u, v, d in G.edges(data=True)]
   g_ig = ig.Graph.TupleList(edges, weights=True)
   
-  partition = leidenalg.find_partition(
-    g_ig,
-    partition_type,
-    **kwargs
-    )
-  
+  partition = leidenalg.find_partition(g_ig, partition_type, **kwargs)
   print("Communities found:", len(partition))
+
+  mod_score = partition.modularity
+  print(f"Modularity: {mod_score:.4f}")
 
   community_sizes = Counter(partition.membership)
   print(community_sizes.most_common(10))
  
   large_comms = {cid for cid, size in community_sizes.items() if size > 5}
-
   filtered_nodes = [v.index for v in g_ig.vs if partition.membership[v.index] in large_comms]
-  mod_score = partition.modularity
-  print(f"Modularity: {mod_score:.4f}")
 
   '''distribution'''
   G_nx = nx.Graph()
@@ -44,7 +39,8 @@ def leiden_community_detection(G, partition_type, **kwargs):
 
   return partition, g_ig, mod_score, community_sizes, G_nx
 
-# leiden_community_detection(G, partition_type=leidenalg.ModularityVertexPartition)
+leiden_community_detection(G, partition_type=leidenalg.ModularityVertexPartition)
+leiden_community_detection(G, partition_type=leidenalg.RBERVertexPartition, resolution_parameter=0.9)
 # generate the best model among all partitiont type
 
 
@@ -85,4 +81,4 @@ def centrality_metrix():
 
     print(f"Average Centrality: {average_centrality:.4f}")
 
-centrality_metrix()
+# centrality_metrix()
